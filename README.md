@@ -1,15 +1,18 @@
-SafeCall Library
+# SafeCall Library
 
-A utility to simplify error handling in Node.js. It automatically wraps async functions with try, catch, and finally blocks, making your code cleaner and more maintainable.
+A utility to simplify error handling in Node.js. It automatically wraps async functions with `try`, `catch`, and `finally` blocks, making your code cleaner and more maintainable.
 
-Installation
+## Installation
 
+```bash
 npm install safe-call-lib
+```
 
-Usage
+## Usage
 
-Basic Usage
+### Basic Usage
 
+```javascript
 const { safeCall } = require('safe-call-lib');
 
 const riskyFunction = async () => {
@@ -19,9 +22,11 @@ const riskyFunction = async () => {
 const safeFunction = safeCall(riskyFunction);
 
 safeFunction(); // Error is caught and logged automatically.
+```
 
-Custom Error Handling
+### Custom Error Handling
 
+```javascript
 const safeFunction = safeCall(riskyFunction, {
   onError: (error) => {
     console.error("Custom error handler:", error.message);
@@ -32,9 +37,11 @@ const safeFunction = safeCall(riskyFunction, {
 });
 
 safeFunction();
+```
 
-Retry Logic
+### Retry Logic
 
+```javascript
 const safeFunction = safeCall(riskyFunction, {
   retries: 3,
   onError: (error, attempt) => {
@@ -43,29 +50,26 @@ const safeFunction = safeCall(riskyFunction, {
 });
 
 safeFunction();
+```
 
-API Reference
+## API Reference
 
-safeCall(fn, options)
+### `safeCall(fn, options)`
 
 Wraps an asynchronous function and provides automatic error handling.
 
-Parameters:
+#### Parameters:
+- **`fn`** *(Function)*: The async function to wrap.
+- **`options`** *(Object, optional)*: Configuration options for error handling.
+  - **`retries`** *(Number, default: 1)*: Number of retry attempts before failing.
+  - **`onError`** *(Function, optional)*: Custom error handler `(error, attempt) => {}`.
+  - **`onFinally`** *(Function, optional)*: Custom cleanup logic `() => {}`.
 
-fn (Function): The async function to wrap.
-
-options (Object, optional): Configuration options for error handling.
-
-retries (Number, default: 1): Number of retry attempts before failing.
-
-onError (Function, optional): Custom error handler (error, attempt) => {}.
-
-onFinally (Function, optional): Custom cleanup logic () => {}.
-
-Contributing
+## Contributing
 
 Pull requests are welcome! Please follow the contribution guidelines.
 
-License
+## License
 
-This project is licensed under the MIT License. 
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
