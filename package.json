@@ -1,25 +1,26 @@
 {
-  "name": "safe-call-lib",
-  "version": "1.0.1",
-  "description": "A simple utility to handle async errors without try-catch blocks in Node.js.",
+  "name": "safe-call-mini",
+  "version": "1.0.0",
+  "description": "A tiny zero-dependency JavaScript utility for predictable safe function execution, retries, and timeouts.",
+  "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Tabisharaza/safeCall"
   },
   "keywords": [
-    "error-handling",
-    "async",
+    "safe-call",
     "try-catch",
-    "nodejs"
+    "retry",
+    "timeout",
+    "async",
+    "utility"
   ],
-  "author": "Your Name",
+  "author": "Tabish Ayub Raza",
   "license": "MIT",
   "dependencies": {},
-  "devDependencies": {
-    "jest": "^29.0.0"
-  }
+  "devDependencies": {}
 }
