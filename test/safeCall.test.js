@@ -1,29 +1,74 @@
-// test/safeCall.test.js
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { safeCall, SafeCallTimeoutError } from '../src/index.js';
 
-const { safeCall } = require('../src/index');
+test('returns a successful result for sync functions', async () => {
+  const result = await safeCall(() => 'ok');
 
-describe('safeCall', () => {
-  test('should return data when function succeeds', async () => {
-    const mockFn = async () => "Success";
-    const wrappedFn = safeCall(mockFn);
-    await expect(wrappedFn()).resolves.toBe("Success");
+  assert.equal(result.ok, true);
+  assert.equal(result.data, 'ok');
+  assert.equal(result.error, null);
+  assert.equal(result.attempts, 1);
+  assert.equal(typeof result.durationMs, 'number');
+});
+
+test('returns a failure result instead of throwing', async () => {
+  const result = await safeCall(() => {
+    throw new Error('broken');
   });
 
-  test('should catch an error and not throw when function fails', async () => {
-    const mockFn = async () => { throw new Error("Test error"); };
-    const wrappedFn = safeCall(mockFn);
-    await expect(wrappedFn()).rejects.toThrow("Test error");
-  });
+  assert.equal(result.ok, false);
+  assert.equal(result.data, null);
+  assert.equal(result.error.message, 'broken');
+  assert.equal(result.attempts, 1);
+});
 
-  test('should retry function when it fails', async () => {
-    let attempt = 0;
-    const mockFn = async () => {
-      attempt++;
-      if (attempt < 3) throw new Error("Retry error");
-      return "Success";
-    };
+test('retries until success', async () => {
+  let attempts = 0;
 
-    const wrappedFn = safeCall(mockFn, { retries: 3 });
-    await expect(wrappedFn()).resolves.toBe("Success");
-  });
+  const result = await safeCall(
+    () => {
+      attempts += 1;
+      if (attempts < 3) throw new Error('not yet');
+      return 'done';
+    },
+    { retries: 3 }
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.data, 'done');
+  assert.equal(result.attempts, 3);
+});
+
+test('calls lifecycle hooks', async () => {
+  const events = [];
+
+  const result = await safeCall(
+    () => {
+      events.push('run');
+      return 42;
+    },
+    {
+      onSuccess: () => events.push('success'),
+      onFinally: () => events.push('finally'),
+    }
+  );
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(events, ['run', 'success', 'finally']);
+});
+
+test('returns timeout error when operation exceeds timeoutMs', async () => {
+  const result = await safeCall(
+    () => new Promise((resolve) => setTimeout(resolve, 50)),
+    { timeoutMs: 5 }
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error instanceof SafeCallTimeoutError, true);
+  assert.equal(result.attempts, 1);
+});
+
+test('rejects non-function input', async () => {
+  await assert.rejects(() => safeCall(null), /expected a function/);
 });
